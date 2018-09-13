@@ -1,6 +1,24 @@
-def instructions():
+def init_round(state):
+    if not state['players']:
+        state['players'] = get_player_names()
+    state['starting_player'] = int(not state['starting_player'])
+    state['current_player'] = state['starting_player']
+    state['board'] = ['#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+    state['result'] = 0
+    return state
+
+
+def init():
+    state = {}
+    state['players'] = []
+    state['tokens'] = ('X', 'O')
+    state['starting_player'] = 0
+    return state
+
+
+def print_instructions():
     clear_screen()
-    instructions=(
+    instructions = (
         'To play enter your names when asked.',
         'Use the number keys to enter your moves:\n'
         '7|8|9',
@@ -10,7 +28,7 @@ def instructions():
         '1|2|3'
     )
     for line in instructions:
-        print (line)
+        print(line)
 
 
 def draw_board(board):
@@ -33,7 +51,7 @@ def get_result(board, token):
     """Returns 1 if a winning line found
     Returns 0 if no winning lines
     Returns -1 if stalemate"""
-    token = tokens[token]
+    token = app['tokens'][token]
     winning_lines = [
         [1, 2, 3],
         [4, 5, 6],
@@ -74,15 +92,16 @@ def validate_num(str):
 
 
 def get_move(board, player):
-    player = players[player]
+    player = app['players'][player]
     inpt = 0
     while board[inpt] != ' ':
-        inpt = int(validate_num(input(f'Ok {player}, your turn...\n')))
+        inpt = int(validate_num(input(f"Ok {player}, your turn...\n")))
         while not (inpt in range(1, 10)):
             inpt = int(validate_num(input('oops! Try again\n')))
         if board[inpt] == ' ':
             return inpt
-        inpt = int(validate_num(input(f'Sorry {player}, that square is already taken!\nTry again...\n')))
+        inpt = int(validate_num(
+            input(f"Sorry {player}, that square is already taken!\nTry again...\n")))
     return inpt
 
 
@@ -100,33 +119,26 @@ def end_message(message):
 
 
 if __name__ == '__main__':
-    players=[]
-    instructions()
-    starting_player = 0
+    app = init()
+    print_instructions()
     while input("\n\n\nReady to play? (y/n)") == 'y':
-
-        clear_screen()
-        tokens = ['X', 'O']
-        if not players:
-            players = get_player_names()
-
-        board = ['#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
-        result = 0
-        starting_player = int(not starting_player)
-        current = starting_player
-
-        while result != 1:
-            current = int(not current)  # alternate current player each turn
-            message = (f" Congratulations {players[current]}!! You're the winner ",'*')
-            clear_screen()
-            draw_board(board)
-            move = get_move(board, current)  # get current player's move
-            board = play_move(board, move, tokens[current])  # update board with latest move
-            draw_board(board)
-            result = get_result(board, current)
+        app = init_round(app)
+        draw_board(app['board'])
+        # loop until a winner or stalemate
+        while app['result'] != 1:
+            # alternate current_player player each turn
+            app['current_player'] = int(not app['current_player'])
+            # get current_player player's move
+            move = get_move(app['board'], app['current_player'])
+            # update board with latest move
+            board = play_move(app['board'], move, app['tokens'][app['current_player']])
+            draw_board(app['board'])
+            result = get_result(app['board'], app['current_player'])
             if result == -1:  # we have a draw
                 message = (f' Oh shame! A draw ', '-')
                 break
+            elif result == 1:
+                message = (f" Congratulations {app['players'][app['current_player']]}!! You're the winner ", '*')
+                break
 
         end_message(message)
-
