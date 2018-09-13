@@ -5,6 +5,7 @@ def init_round(state):
     state['current_player'] = state['starting_player']
     state['board'] = ['#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
     state['result'] = 0
+    state['game_over_message'] = ""
     return state
 
 
@@ -32,11 +33,15 @@ def print_instructions():
 
 
 def draw_board(board):
-    """takes a 3x 3 matrix and displays it as a tic tac toe board"""
+    """takes a length 10 list and displays elements 1-9 as a tic tac toe board.
+    @:param board: 10 element list"""
     clear_screen()
-    top_row = f'\t {board[7]} | {board[8]} | {board[9]} '
-    middle_row = f'\t {board[4]} | {board[5]} | {board[6]} '
-    bottom_row = f'\t {board[1]} | {board[2]} | {board[3]} '
+    top_row = \
+        f'\t {board[7]} | {board[8]} | {board[9]} '
+    middle_row = \
+        f'\t {board[4]} | {board[5]} | {board[6]} '
+    bottom_row = \
+        f'\t {board[1]} | {board[2]} | {board[3]} '
     verticals = '\t   |   |     '
     middles = '\t---+---+---'
     print(f'\n\n{verticals}\n{top_row}\n{middles}\n{middle_row}\n{middles}\n{bottom_row}\n{verticals}')
@@ -48,9 +53,13 @@ def clear_screen():
 
 
 def get_result(board, token):
-    """Returns 1 if a winning line found
+    """Checks for winning lines in tic tac toe.
+    Returns 1 if a winning line found
     Returns 0 if no winning lines
-    Returns -1 if stalemate"""
+    Returns -1 if stalemate
+    @:param token: integer index of character to check against
+    @:param board: 10 element list, elements 1-9 represent tic tac toe board"""
+    # get character to check (usually X or O)
     token = app['tokens'][token]
     winning_lines = [
         [1, 2, 3],
@@ -63,13 +72,12 @@ def get_result(board, token):
         [3, 5, 7],
     ]
     for line in winning_lines:
-        for pos in line:
-            if board[pos] != token:
-                break  # break if no winning token at position: pos in the line
-        else:  # checked all elements in a line without breaking so is a winner!!
-            return 1  # we have a winner
+        if board[line[0]] == board[line[1]] == board[line[2]] == token:
+            return 1
+    # no winner so check for draw
     if ' ' not in board:
         return -1  # it's a draw
+    # no draw
     return 0  # still playing
 
 
@@ -110,7 +118,7 @@ def play_move(board, move, token):
     return board
 
 
-def end_message(message):
+def game_over(message):
     for _ in range(3):
         print(message[1] * 50)
     print(message[0].center(50, message[1]))
@@ -121,6 +129,7 @@ def end_message(message):
 if __name__ == '__main__':
     app = init()
     print_instructions()
+    # loop until user quits
     while input("\n\n\nReady to play? (y/n)") == 'y':
         app = init_round(app)
         draw_board(app['board'])
@@ -133,12 +142,13 @@ if __name__ == '__main__':
             # update board with latest move
             board = play_move(app['board'], move, app['tokens'][app['current_player']])
             draw_board(app['board'])
+            # check for a winner (or draw)
             result = get_result(app['board'], app['current_player'])
             if result == -1:  # we have a draw
-                message = (f' Oh shame! A draw ', '-')
+                app['game_over_message'] = (f' Oh shame! A draw ', '-')
                 break
-            elif result == 1:
-                message = (f" Congratulations {app['players'][app['current_player']]}!! You're the winner ", '*')
+            elif result == 1:  # we have a winner
+                app['game_over_message'] = (
+                    f" Congratulations {app['players'][app['current_player']]}!! You're the winner ", '*')
                 break
-
-        end_message(message)
+        game_over(app['game_over_message'])
