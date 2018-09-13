@@ -1,3 +1,18 @@
+def instructions():
+    clear_screen()
+    instructions=(
+        'To play enter your names when asked.',
+        'Use the number keys to enter your moves:\n'
+        '7|8|9',
+        '-+-+-',
+        '4|5|6',
+        '-+-+-',
+        '1|2|3'
+    )
+    for line in instructions:
+        print (line)
+
+
 def draw_board(board):
     """takes a 3x 3 matrix and displays it as a tic tac toe board"""
     clear_screen()
@@ -12,7 +27,6 @@ def draw_board(board):
 
 def clear_screen():
     print('\n' * 100)
-    pass
 
 
 def get_result(board, token):
@@ -65,7 +79,7 @@ def get_move(board, player):
     while board[inpt] != ' ':
         inpt = int(validate_num(input(f'Ok {player}, your turn...\n')))
         while not (inpt in range(1, 10)):
-            inpt = int(input('oops! Try again\n'))
+            inpt = int(validate_num(input('oops! Try again\n')))
         if board[inpt] == ' ':
             return inpt
         inpt = int(validate_num(input(f'Sorry {player}, that square is already taken!\nTry again...\n')))
@@ -87,7 +101,9 @@ def end_message(message):
 
 if __name__ == '__main__':
     players=[]
-    while input("\n\n\nReady to play? (y/n)") =='y':
+    instructions()
+    starting_player = 0
+    while input("\n\n\nReady to play? (y/n)") == 'y':
 
         clear_screen()
         tokens = ['X', 'O']
@@ -96,7 +112,8 @@ if __name__ == '__main__':
 
         board = ['#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
         result = 0
-        current = 1
+        starting_player = int(not starting_player)
+        current = starting_player
 
         while result != 1:
             current = int(not current)  # alternate current player each turn
@@ -108,7 +125,7 @@ if __name__ == '__main__':
             draw_board(board)
             result = get_result(board, current)
             if result == -1:  # we have a draw
-                message = (f' Oh shame! A draw ','-')
+                message = (f' Oh shame! A draw ', '-')
                 break
 
         end_message(message)
