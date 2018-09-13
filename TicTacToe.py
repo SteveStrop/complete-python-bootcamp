@@ -1,20 +1,37 @@
-def init_round(state):
-    if not state['players']:
-        state['players'] = get_player_names()
-    state['starting_player'] = int(not state['starting_player'])
-    state['current_player'] = state['starting_player']
-    state['board'] = ['#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
-    state['result'] = 0
-    state['game_over_message'] = ""
-    return state
+import random
 
 
 def init():
     state = {}
     state['players'] = []
-    state['tokens'] = ('X', 'O')
-    state['starting_player'] = 0
+    state['tokens'] = ('X', 'O', ' ')  # symbols for player1, player2 and empty square
+    state['starting_player'] = 1
     return state
+
+
+def init_round(state):
+    if not state['players']:
+        state['players'] = get_player_names()
+        state['starting_player'] = flip_for_start(state['players'])
+    state['starting_player'] = int(not state['starting_player'])
+    state['current_player'] = state['starting_player']
+    state['board'] = [state['tokens'][2]] * 10
+    state['result'] = 0
+    state['game_over_message'] = ''
+    clear_screen()
+    return state
+
+
+def flip_for_start(players):
+    input(f'Hit any key to flip to start {players[0]}')
+    flip = random.randint(0, 1)
+    if flip == 0:
+        print(f"Tails you loose.It's {players[1]}'s go.")
+    else:
+        print(f'Heads you win! You go first {players[0]}.')
+
+    input('Hit any key to start')
+    return flip
 
 
 def print_instructions():
@@ -35,7 +52,6 @@ def print_instructions():
 def draw_board(board):
     """takes a length 10 list and displays elements 1-9 as a tic tac toe board.
     @:param board: 10 element list"""
-    clear_screen()
     top_row = \
         f'\t {board[7]} | {board[8]} | {board[9]} '
     middle_row = \
@@ -61,6 +77,7 @@ def get_result(board, token):
     @:param board: 10 element list, elements 1-9 represent tic tac toe board"""
     # get character to check (usually X or O)
     token = app['tokens'][token]
+    blank = app['tokens'][2]
     winning_lines = [
         [1, 2, 3],
         [4, 5, 6],
@@ -71,25 +88,25 @@ def get_result(board, token):
         [1, 5, 9],
         [3, 5, 7],
     ]
+    # create a list of elements from board corresponding to each winning line and compare to a winning line of token
     for line in winning_lines:
         if board[line[0]] == board[line[1]] == board[line[2]] == token:
             return 1
     # no winner so check for draw
-    if ' ' not in board:
+    if blank not in board:
         return -1  # it's a draw
     # no draw
     return 0  # still playing
 
 
 def get_player_names():
-    """Gets user input for player one and player two"""
+    """Gets user names for player one two"""
     players = []
     for i in range(2):
         inpt = input(f'Please enter you name Player {i+1}:\n')
         if inpt.strip() == '':
-            inpt = f'Player{i}'
+            inpt = f'Player {i+1}'  # default is Player 1 or 2
         players.append(inpt)
-        clear_screen()
     return players
 
 
@@ -106,15 +123,15 @@ def get_move(board, player):
         inpt = int(validate_num(input(f"Ok {player}, your turn...\n")))
         while not (inpt in range(1, 10)):
             inpt = int(validate_num(input('oops! Try again\n')))
-        if board[inpt] == ' ':
+        if board[inpt] == ' ':  # TODO allow different bgs
             return inpt
         inpt = int(validate_num(
             input(f"Sorry {player}, that square is already taken!\nTry again...\n")))
     return inpt
 
 
-def play_move(board, move, token):
-    board[move] = token
+def play_move(board, position, token):
+    board[position] = token
     return board
 
 
@@ -132,7 +149,6 @@ if __name__ == '__main__':
     # loop until user quits
     while input("\n\n\nReady to play? (y/n)") == 'y':
         app = init_round(app)
-        draw_board(app['board'])
         # loop until a winner or stalemate
         while app['result'] != 1:
             # alternate current_player player each turn
@@ -141,6 +157,7 @@ if __name__ == '__main__':
             move = get_move(app['board'], app['current_player'])
             # update board with latest move
             board = play_move(app['board'], move, app['tokens'][app['current_player']])
+            clear_screen()
             draw_board(app['board'])
             # check for a winner (or draw)
             result = get_result(app['board'], app['current_player'])
