@@ -3,7 +3,7 @@ import random
 
 def init():
     state = dict(players=[],
-                 tokens=('X', 'O', '%'),  # (player 1 marker, player 2 marker, empty square marker)
+                 tokens=('X', 'O', ' '),  # (player 1 marker, player 2 marker, empty square marker)
                  starting_player=1)
     return state
 
@@ -18,18 +18,19 @@ def init_round(state):
     state['result'] = 0
     state['game_over_message'] = ''
     clear_screen()
+    draw_board(state['board'])
     return state
 
 
 def flip_for_start(players):
-    input(f'Hit any key to flip to start {players[0]}')
+    input(f'Toss a coin to see who starts. Press any key {players[0]}')
     flip = random.randint(0, 1)
-    if flip == 0:
+    if flip == 1:
         print(f"Tails you loose.It's {players[1]}'s go.")
     else:
         print(f'Heads you win! You go first {players[0]}.')
 
-    input('Hit any key to start')
+    input('Press any key to continue')
     return flip
 
 
@@ -64,7 +65,8 @@ def draw_board(board):
 
 
 def clear_screen():
-    print('\n' * 100)
+    pass
+    # print('\n' * 100)
 
 
 def get_result(board, token):
@@ -109,84 +111,60 @@ def get_player_names():
     return players
 
 
-def get_int(string):
-    """Returns integer value of string or zero if string not a number"""
-    try:
-        num = int(string)
-        return num
-    except ValueError:
-        return 0
+def is_number(n):
+    if n.isnumeric():
+        return int(n)
+    print(f'{n} is not a number!')
+    return False
 
 
-def is_space(board, position, space=' '):
+def in_range(n):
+    if n in range(0, 10):
+        return n
+    print(f'{n} is out of range. Try a number from 1 to 9')
+    return False
+
+
+def is_space(board,position, space=' '):
     """ @:param: space: character to use as a space default is ' ' """
-    return board[position] == space
+    if board[position] == space:
+        return position
+    print("Sorry, that square is already taken!")
+    return False
 
 
-def get_move2(board, player):
+def get_move(board,player):
     player = app['players'][player]
-    inpt = 0
-
-    # loop while input is not in an empty square
-    while board[inpt] != app['tokens'][2]:  #
+    num = ''
+    first_loop = True
+    while not num:
+        # set prompt string
+        if first_loop:
+            prompt = f"Ok {player}, your turn...\n" # first time only
+        else:
+            prompt = "Try again...\n"   # if looped at least once already
+        first_loop = False
         # get number input
-        while not inpt:
-            inpt = (input(f"Ok {player}, your turn...\n"))
-            while not inpt:
-                inpt = get_int(inpt)
-            if not inpt:
-                print("That's not a number! Try again.")
-        # check number is valid
-        while not (inpt in range(1, 10)):
-            try:
-                inpt = int((input('oops! Try again\n')))
-            except ValueError:
-                pass
-        # return move if square is empty
-    if board[inpt] == app['tokens'][2]:  #
-        return inpt
-        # else loop until it is
-    while board[inpt] != app['tokens'][2]:  #
-        try:
-            inpt = int(input(f"Sorry {player}, that square is already taken!\nTry again...\n"))
-        except ValueError:
-            pass
-    return inpt
-
-
-def get_move(board, player):
-    player = app['players'][player]
-    inpt = 0
-    print(board)
-    print(f"board[inpt] = {board[inpt]}, token = {app['tokens'][2]}")
-    # loop while input is not in an empty square
-    while board[inpt] != app['tokens'][2]:  #
-        # loop until number
-        while not inpt:
-            try:
-                inpt = int((input(f"Ok {player}, your turn...\n")))
-            except ValueError:
-                print("That's not a number! Try again.")
-        # check number is valid
-        while not (inpt in range(1, 10)):
-            try:
-                inpt = int((input('oops! Try again\n')))
-            except ValueError:
-                pass
-        # return move if square is empty
-        if board[inpt] == app['tokens'][2]:  #
-            return inpt
-        # else loop until it is
-        while board[inpt] != app['tokens'][2]:  #
-            try:
-                inpt = int(input(f"Sorry {player}, that square is already taken!\nTry again...\n"))
-            except ValueError:
-                pass
-    return inpt
+        num = input(prompt)
+        # check is a number
+        num = is_number(num)
+        if not num:
+            continue
+        # check num is in range
+        num = in_range(num)
+        if not num:
+            continue
+        # check square available
+        num = is_space(board,num, app['tokens'][2])
+        if not num:
+            continue
+    return num
 
 
 def play_move(board, position, token):
     board[position] = token
+    clear_screen()
+    draw_board(board)
     return board
 
 
@@ -212,8 +190,6 @@ if __name__ == '__main__':
             move = get_move(app['board'], app['current_player'])
             # update board with latest move
             board = play_move(app['board'], move, app['tokens'][app['current_player']])
-            clear_screen()
-            draw_board(app['board'])
             # check for a winner (or draw)
             result = get_result(app['board'], app['current_player'])
             if result == -1:  # we have a draw
