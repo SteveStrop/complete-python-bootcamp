@@ -4,11 +4,11 @@ import random
 class Game:
     def __init__(self):
         self.players = None
-        self.tokens = ('X', 'O', ' ') # (player 1 marker, player 2 marker, empty square marker)
-        self.starting_player = None
-        self.current_player = None
+        self.tokens = ('X', 'O', ' ')  # (player 1 marker, player 2 marker, empty square marker)
+        self.starting_player = None  # index number of starting player 0 or 1
+        self.current_player = None  # index number of current player 0 or 1
         self.board = None
-        self.result = None
+        self.winner = None
         self.over_message = None
 
 
@@ -127,7 +127,7 @@ def in_range(n):
     return False
 
 
-def is_space(board,position, space=' '):
+def is_space(board, position, space=' '):
     """ @:param: space: character to use as a space default is ' ' """
     if board[position] == space:
         return position
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     while input("\n\n\nReady to play? (y/n)") != 'n':
         init_round(game)
         # loop until a winner or stalemate
-        while game.result != 1:
+        while game.winner != 1:
             # alternate player each turn
             game.current_player = int(not game.current_player)
             # get current_player player's move
