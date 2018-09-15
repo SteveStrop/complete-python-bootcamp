@@ -11,45 +11,43 @@ class Game:
         self.winner = None
         self.over_message = None
 
+    @staticmethod
+    def print_instructions():
+
+        instructions = (
+            'To play enter your names when asked.',
+            'Use the number keys to enter your moves:\n'
+            '7|8|9',
+            '-+-+-',
+            '4|5|6',
+            '-+-+-',
+            '1|2|3'
+        )
+        clear_screen()
+        for line in instructions:
+            print(line)
+
+    def flip_for_start(self):
+        input(f'{self.players[0]}, press a key to toss for start')
+        flip = random.randint(0, 1)
+        if flip == 1:
+            print(f"Tails you loose.It's {self.players[1]}'s go.")
+        else:
+            print(f'Heads you win! You go first {self.players[0]}.')
+        input('Press any key to continue')
+        return flip
+
 
 def init_round(g):
     if g.players is None:
         g.players = get_player_names()
-        g.starting_player = flip_for_start(g.players)
+        g.starting_player = g.flip_for_start()
     g.starting_player = int(not g.starting_player)
     g.current_player = g.starting_player
     g.board = ['|'] + [g.tokens[2]] * 9  # | is a placeholder and cannot be used as a blank square marker
     clear_screen()
     draw_board(g.board)
     return g
-
-
-def flip_for_start(players):
-    input(f'{players[0]}, press a key to toss for start')
-    flip = random.randint(0, 1)
-    if flip == 1:
-        print(f"Tails you loose.It's {players[1]}'s go.")
-    else:
-        print(f'Heads you win! You go first {players[0]}.')
-
-    input('Press any key to continue')
-    return flip
-
-
-def print_instructions():
-
-    instructions = (
-        'To play enter your names when asked.',
-        'Use the number keys to enter your moves:\n'
-        '7|8|9',
-        '-+-+-',
-        '4|5|6',
-        '-+-+-',
-        '1|2|3'
-    )
-    clear_screen()
-    for line in instructions:
-        print(line)
 
 
 def draw_board(board):
@@ -178,7 +176,7 @@ def game_over(message):
 
 if __name__ == '__main__':
     game = Game()
-    print_instructions()
+    game.print_instructions()
     # loop until user quits
     while input("\n\n\nReady to play? (y/n)") != 'n':
         init_round(game)
