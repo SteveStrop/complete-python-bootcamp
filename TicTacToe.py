@@ -3,24 +3,22 @@ import random
 
 class Game:
     def __init__(self):
-        self.players = []
+        self.players = None
         self.tokens = ('X', 'O', ' ') # (player 1 marker, player 2 marker, empty square marker)
-        self.starting_player = ''
-        self.current_player = 0
-        self.board = []
-        self.result = 0
-        self.over_message = ''
+        self.starting_player = None
+        self.current_player = None
+        self.board = None
+        self.result = None
+        self.over_message = None
 
 
 def init_round(g):
-    if not g.players:
+    if g.players is None:
         g.players = get_player_names()
         g.starting_player = flip_for_start(g.players)
     g.starting_player = int(not g.starting_player)
     g.current_player = g.starting_player
     g.board = ['|'] + [g.tokens[2]] * 9  # | is a placeholder and cannot be used as a blank square marker
-    g.result = 0
-    g.over_message = ''
     clear_screen()
     draw_board(g.board)
     return g
@@ -39,7 +37,7 @@ def flip_for_start(players):
 
 
 def print_instructions():
-    clear_screen()
+
     instructions = (
         'To play enter your names when asked.',
         'Use the number keys to enter your moves:\n'
@@ -49,6 +47,7 @@ def print_instructions():
         '-+-+-',
         '1|2|3'
     )
+    clear_screen()
     for line in instructions:
         print(line)
 
@@ -73,14 +72,14 @@ def clear_screen():
     print('\n' * 100)
 
 
-def get_result(board, token):
+def check_winner(board, token):
     """Checks for winning lines in tic tac toe.
     Returns 1 if a winning line found
     Returns 0 if no winning lines
     Returns -1 if stalemate
     @:param token: integer index of character to check against
     @:param board: 10 element list, elements 1-9 represent tic tac toe board"""
-    # get character to check (usually X or O)
+    # get character used as an empty square (usually X or O)
     blank = game.tokens[2]
     winning_lines = [
         [1, 2, 3],
@@ -192,13 +191,15 @@ if __name__ == '__main__':
             # update board with latest move
             board = play_move(game.board, move, game.tokens[game.current_player])
             # check for a winner (or draw)
-            result = get_result(game.board, game.tokens[game.current_player])
-            if result == -1:  # we have a draw
+            winner = check_winner(game.board, game.tokens[game.current_player])
+            if winner == -1:  # we have a draw
                 game.over_message = (f' Oh shame! A draw ', '-')
                 break
-            elif result == 1:  # we have a winner
+            elif winner == 1:  # we have a winner
                 game.over_message = (
                     f" Congratulations {game.players[game.current_player]}!! You're the winner ", '*')
                 break
+            # no winner or draw so loop:
+            continue
         game_over(game.over_message)
     print('Bye!')
