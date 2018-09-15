@@ -1,29 +1,32 @@
 import random
 
 
-def init():
-    state = dict(players=[],
-                 tokens=('X', 'O', ' '),  # (player 1 marker, player 2 marker, empty square marker)
-                 starting_player=1)
-    return state
+class Game:
+    def __init__(self):
+        self.players = []
+        self.tokens = ('X', 'O', ' ') # (player 1 marker, player 2 marker, empty square marker)
+        self.starting_player = ''
+        self.current_player = 0
+        self.board = []
+        self.result = 0
+        self.over_message = ''
 
 
-def init_round(state):
-    if not state['players']:
-        state['players'] = get_player_names()
-        state['starting_player'] = flip_for_start(state['players'])
-    state['starting_player'] = int(not state['starting_player'])
-    state['current_player'] = state['starting_player']
-    state['board'] = ['|'] + [state['tokens'][2]] * 9  # | is a placeholder and cannot be used as a blank square marker
-    state['result'] = 0
-    state['game_over_message'] = ''
-    clear_screen()
-    draw_board(state['board'])
-    return state
+def init_round(g):
+    if not g.players:
+        g.players = get_player_names()
+        g.starting_player = flip_for_start(g.players)
+    g.starting_player = int(not g.starting_player)
+    g.current_player = g.starting_player
+    g.board = ['|'] + [g.tokens[2]] * 9  # | is a placeholder and cannot be used as a blank square marker
+    g.result = 0
+    g.over_message = ''
+    draw_board(g.board)
+    return g
 
 
 def flip_for_start(players):
-    input(f'Toss a coin to see who starts. Press any key {players[0]}')
+    input(f'{players[0]}, press a key to toss for start')
     flip = random.randint(0, 1)
     if flip == 1:
         print(f"Tails you loose.It's {players[1]}'s go.")
@@ -66,7 +69,7 @@ def draw_board(board):
 
 def clear_screen():
     pass
-    # print('\n' * 100)
+    print('\n' * 100)
 
 
 def get_result(board, token):
@@ -77,8 +80,7 @@ def get_result(board, token):
     @:param token: integer index of character to check against
     @:param board: 10 element list, elements 1-9 represent tic tac toe board"""
     # get character to check (usually X or O)
-    token = app['tokens'][token]
-    blank = app['tokens'][2]
+    blank = game.tokens[2]
     winning_lines = [
         [1, 2, 3],
         [4, 5, 6],
@@ -134,7 +136,7 @@ def is_space(board,position, space=' '):
 
 
 def get_move(board,player):
-    player = app['players'][player]
+    player = game.players[player]
     num = ''
     first_loop = True
     while not num:
@@ -155,7 +157,7 @@ def get_move(board,player):
         if not num:
             continue
         # check square available
-        num = is_space(board,num, app['tokens'][2])
+        num = is_space(board, num, game.tokens[2])
         if not num:
             continue
     return num
@@ -169,35 +171,33 @@ def play_move(board, position, token):
 
 
 def game_over(message):
-    for _ in range(3):
-        print(message[1] * 50)
+    print(message[1] * 50)
     print(message[0].center(50, message[1]))
-    for _ in range(3):
-        print(message[1] * 50)
+    print(message[1] * 50)
 
 
 if __name__ == '__main__':
-    app = init()
+    game = Game()
     print_instructions()
     # loop until user quits
     while input("\n\n\nReady to play? (y/n)") != 'n':
-        app = init_round(app)
+        init_round(game)
         # loop until a winner or stalemate
-        while app['result'] != 1:
+        while game.result != 1:
             # alternate player each turn
-            app['current_player'] = int(not app['current_player'])
+            game.current_player = int(not game.current_player)
             # get current_player player's move
-            move = get_move(app['board'], app['current_player'])
+            move = get_move(game.board, game.current_player)
             # update board with latest move
-            board = play_move(app['board'], move, app['tokens'][app['current_player']])
+            board = play_move(game.board, move, game.tokens[game.current_player])
             # check for a winner (or draw)
-            result = get_result(app['board'], app['current_player'])
+            result = get_result(game.board, game.tokens[game.current_player])
             if result == -1:  # we have a draw
-                app['game_over_message'] = (f' Oh shame! A draw ', '-')
+                game.over_message = (f' Oh shame! A draw ', '-')
                 break
             elif result == 1:  # we have a winner
-                app['game_over_message'] = (
-                    f" Congratulations {app['players'][app['current_player']]}!! You're the winner ", '*')
+                game.over_message = (
+                    f" Congratulations {game.players[game.current_player]}!! You're the winner ", '*')
                 break
-        game_over(app['game_over_message'])
+        game_over(game.over_message)
     print('Bye!')
