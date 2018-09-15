@@ -21,6 +21,7 @@ def init_round(g):
     g.board = ['|'] + [g.tokens[2]] * 9  # | is a placeholder and cannot be used as a blank square marker
     g.result = 0
     g.over_message = ''
+    clear_screen()
     draw_board(g.board)
     return g
 
@@ -142,7 +143,7 @@ def get_move(board,player):
     while not num:
         # set prompt string
         if first_loop:
-            prompt = f"Ok {player}, your turn...\n" # first time only
+            prompt = f"Ok {player}, your turn...\n"  # first time only
         else:
             prompt = "Try again...\n"   # if looped at least once already
         first_loop = False
