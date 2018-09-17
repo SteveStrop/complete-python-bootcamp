@@ -7,7 +7,6 @@ class Match:
         self.starting_player = None  # index number of starting player 0 or 1
         self.current_player = None  # index number of current player 0 or 1
 
-
     def print_instructions(self):
 
         self.clear_screen()
@@ -54,7 +53,7 @@ class Game:
         self.tokens = ('X', 'O', ' ')  # (player 1 marker, player 2 marker, empty square marker)
         self.board = ['|'] + [self.tokens[2]] * 9
         self.winner = None
-        self.over_message = None
+        self.message = None
 
     def draw_board(self):
         """takes a length 10 list and displays elements 1-9 as a tic tac toe board.
@@ -92,10 +91,15 @@ class Game:
             if not num:
                 continue
             # check square available
-            num = is_space(self.board, num, self.tokens[2])
+            num = self.is_space(num, self.tokens[2])
             if not num:
                 continue
         return num
+
+    def play_move(self, position, token):
+        self.board[position] = token
+        match.clear_screen()
+        self.draw_board()
 
     def check_winner(self, token):
         # get character used as an empty square (usually X or O)
@@ -129,10 +133,23 @@ class Game:
 
     @staticmethod
     def in_range(n):
+
         if n in range(0, 10):
             return n
         print(f'{n} is out of range. Try a number from 1 to 9')
         return False
+
+    def is_space(self, position, space=' '):
+        """ @:param: space: character to use as a space default is ' ' """
+        if self.board[position] == space:
+            return position
+        print("Sorry, that square is already taken!")
+        return False
+
+    def over_message(self):
+        print(self.message[1] * 50)
+        print(self.message[0].center(50, self.message[1]))
+        print(self.message[1] * 50)
 
 
 def init_game(m):
@@ -145,27 +162,6 @@ def init_game(m):
     m.clear_screen()
     b.draw_board()
     return b
-
-
-def is_space(board, position, space=' '):
-    """ @:param: space: character to use as a space default is ' ' """
-    if board[position] == space:
-        return position
-    print("Sorry, that square is already taken!")
-    return False
-
-
-def play_move(board, position, token):
-    board.board[position] = token
-    match.clear_screen()
-    board.draw_board()
-
-
-def game_over(message):
-    print(message[1] * 50)
-    print(message[0].center(50, message[1]))
-    print(message[1] * 50)
-
 
 if __name__ == '__main__':
     match = Match()
@@ -180,17 +176,17 @@ if __name__ == '__main__':
             # get current_player player's move
             move = game.get_move(match.current_player)
             # update board with latest move
-            play_move(game, move, game.tokens[match.current_player])
+            game.play_move(move, game.tokens[match.current_player])
             # check for a winner (or draw)
             winner = game.check_winner(game.tokens[match.current_player])
             if winner == -1:  # we have a draw
-                game.over_message = (f' Oh shame! A draw ', '-')
+                game.message = (f' Oh shame! A draw ', '-')
                 break
             elif winner == 1:  # we have a winner
-                game.over_message = (
+                game.message = (
                     f" Congratulations {match.players[match.current_player]}!! You're the winner ", '*')
                 break
             # no winner or draw so loop:
             continue
-        game_over(game.over_message)
+        game.over_message()
     print('Bye!')
