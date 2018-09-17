@@ -3,9 +3,8 @@ import random
 
 class Match:
     def __init__(self):
-        self.players = None
-        self.starting_player = None  # index number of starting player 0 or 1
-        self.current_player = None  # index number of current player 0 or 1
+        self.players = []
+
 
     def print_instructions(self):
 
@@ -27,6 +26,14 @@ class Match:
         pass
         #  print('\n' * 100)
 
+    def get_player_names(self):
+        """Gets user names for player one two"""
+        for i in range(1, 3):
+            inpt = input(f'Please enter you name Player {i}:\n')
+            if inpt.strip() == '':
+                inpt = f'Player {i}'  # default is Player 1 or 2
+            self.players.append(inpt)
+
     def flip_for_start(self):
         input(f'{self.players[0]}, press a key to toss for start')
         flip = random.randint(0, 1)
@@ -35,21 +42,13 @@ class Match:
         else:
             print(f'Heads you win! You go first {self.players[0]}.')
         input('Press any key to continue')
-        self.starting_player=flip
-
-    def get_player_names(self):
-        """Gets user names for player one two"""
-        self.players = []
-        for i in range(2):
-            inpt = input(f'Please enter you name Player {i+1}:\n')
-            if inpt.strip() == '':
-                inpt = f'Player {i+1}'  # default is Player 1 or 2
-            self.players.append(inpt)
+        self.starting_player = flip
 
 
-class Game:
+class Game(Match):
 
     def __init__(self):
+        Match.__init__(self)
         self.tokens = ('X', 'O', ' ')  # (player 1 marker, player 2 marker, empty square marker)
         self.board = ['|'] + [self.tokens[2]] * 9
         self.winner = None
@@ -70,7 +69,7 @@ class Game:
         print('\n' * 2)
 
     def get_move(self, player):
-        player = match.players[player]
+        player = self.players[player]
         num = ''
         first_loop = True
         while not num:
@@ -98,7 +97,7 @@ class Game:
 
     def play_move(self, position, token):
         self.board[position] = token
-        match.clear_screen()
+        self.clear_screen()
         self.draw_board()
 
     def check_winner(self, token):
@@ -163,28 +162,35 @@ def init_game(m):
     b.draw_board()
     return b
 
+
 if __name__ == '__main__':
-    match = Match()
-    match.print_instructions()
+    game = Game()  # TODO initiate a match. start a new game class every loop or reset the class
+    game.print_instructions()
+    game.get_player_names()
+    game.flip_for_start()
+    game.starting_player = int(not game.starting_player)
+    game.current_player = game.starting_player
+
+
     # loop until user quits
     while input("\n\n\nReady to play? (y/n)") != 'n':
-        game = init_game(match)
+
         # loop until a winner or stalemate
         while game.winner != 1:
             # alternate player each turn
-            match.current_player = int(not match.current_player)
+            game.current_player = int(not game.current_player)
             # get current_player player's move
-            move = game.get_move(match.current_player)
+            move = game.get_move(game.current_player)
             # update board with latest move
-            game.play_move(move, game.tokens[match.current_player])
+            game.play_move(move, game.tokens[game.current_player])
             # check for a winner (or draw)
-            winner = game.check_winner(game.tokens[match.current_player])
+            winner = game.check_winner(game.tokens[game.current_player])
             if winner == -1:  # we have a draw
                 game.message = (f' Oh shame! A draw ', '-')
                 break
             elif winner == 1:  # we have a winner
                 game.message = (
-                    f" Congratulations {match.players[match.current_player]}!! You're the winner ", '*')
+                    f" Congratulations {game.players[game.current_player]}!! You're the winner ", '*')
                 break
             # no winner or draw so loop:
             continue
