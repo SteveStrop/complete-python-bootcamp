@@ -4,19 +4,19 @@ import random
 class Match:
     def __init__(self):
         self.players = []
-
+        self.starting_player = None
+        self.current_player = None
 
     def print_instructions(self):
 
         self.clear_screen()
         instructions = (
-            'To play, enter your names when asked.',
-            'Use the number keys to enter your moves:\n'
+            'Use the number keys to enter your moves:\n\n'
             '7|8|9',
             '-+-+-',
             '4|5|6',
             '-+-+-',
-            '1|2|3'
+            '1|2|3\n'
         )
         for line in instructions:
             print(line)
@@ -24,25 +24,25 @@ class Match:
     @staticmethod
     def clear_screen():
         pass
-        #  print('\n' * 100)
+        print('\n' * 100)
 
     def get_player_names(self):
         """Gets user names for player one two"""
         for i in range(1, 3):
-            inpt = input(f'Please enter you name Player {i}:\n')
+            inpt = input(f'\n\nPlease enter you name Player {i}:\n')
             if inpt.strip() == '':
                 inpt = f'Player {i}'  # default is Player 1 or 2
             self.players.append(inpt)
 
     def flip_for_start(self):
-        input(f'{self.players[0]}, press a key to toss for start')
+        input(f'\n{self.players[0]}, press a key to see who goes first')
         flip = random.randint(0, 1)
-        if flip == 1:
-            print(f"Tails you loose.It's {self.players[1]}'s go.")
+        if flip == 0:
+            print(f"It's Tails. {self.players[1]} goes first.")
         else:
-            print(f'Heads you win! You go first {self.players[0]}.')
-        input('Press any key to continue')
+            print(f'Heads! You go first, {self.players[0]}.')
         self.starting_player = flip
+        self.current_player = flip
 
 
 class Game(Match):
@@ -53,6 +53,9 @@ class Game(Match):
         self.board = ['|'] + [self.tokens[2]] * 9
         self.winner = None
         self.message = None
+        self.print_instructions()
+        self.get_player_names()
+        self.flip_for_start()
 
     def draw_board(self):
         """takes a length 10 list and displays elements 1-9 as a tic tac toe board.
@@ -150,31 +153,20 @@ class Game(Match):
         print(self.message[0].center(50, self.message[1]))
         print(self.message[1] * 50)
 
-
-def init_game(m):
-    if m.players is None:
-        m.get_player_names()
-        m.flip_for_start()
-    m.starting_player = int(not m.starting_player)
-    m.current_player = m.starting_player
-    b = Game()
-    m.clear_screen()
-    b.draw_board()
-    return b
+    def reset(self):
+        self.board = ['|'] + [self.tokens[2]] * 9
+        self.winner = None
+        self.message = None
+        self.current_player = int(not self.current_player)
 
 
 if __name__ == '__main__':
-    game = Game()  # TODO initiate a match. start a new game class every loop or reset the class
-    game.print_instructions()
-    game.get_player_names()
-    game.flip_for_start()
-    game.starting_player = int(not game.starting_player)
-    game.current_player = game.starting_player
-
+    game = Game()
 
     # loop until user quits
     while input("\n\n\nReady to play? (y/n)") != 'n':
 
+        game.draw_board()
         # loop until a winner or stalemate
         while game.winner != 1:
             # alternate player each turn
@@ -195,4 +187,5 @@ if __name__ == '__main__':
             # no winner or draw so loop:
             continue
         game.over_message()
+        game.reset()
     print('Bye!')
